@@ -8,7 +8,7 @@ import random
 
 TOKEN = os.getenv("TWOK_TOKEN", "MTUyMTg0MzY1NjQxNDQ2MjA0NA.GdkdU3.5Hg4mm-C50d8itia-3kRgWNkiurcCZCms5JuRs")
 
-AUTO_ROLE_NAME     = "Member"
+AUTO_ROLE_NAME     = "Community"
 ROSTER_ROLE_NAME   = "Roster"
 RAID_ALERT_USERS   = ["noahblocks23", ""]
 NEW_ACCOUNT_DAYS   = 7          # accounts younger than this get kicked during an active raid
@@ -16,20 +16,20 @@ MILESTONE_STEP     = 50         # celebrate every 50 members
 
 ADMIN_ROLES = [
     "Founder",
-    "Co-Founder",
-    "Co Founder",
-    "Owner",
-    "Admin",
-    "Manager",
+    "Chief Technolgy Officer",
+    "",
+    "",
+    "",
+    "",
 ]
 
 STAFF_ROLES = ADMIN_ROLES + [
-    "Head Moderator",
-    "Senior Moderator",
-    "Moderator",
-    "Junior Moderator",
-    "Trial Moderator",
-    "Coach",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
 ]
 
 INVITE_STRINGS   = ["discord.gg/", "discord.com/invite/"]
