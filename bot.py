@@ -5,18 +5,31 @@ import asyncio
 from datetime import datetime, timedelta
 import os
 import random
+from dotenv import load_dotenv
+load_dotenv(). 
 
-TOKEN = os.getenv("TWOK_TOKEN", "MTUyMTg0MzY1NjQxNDQ2MjA0NA.GdkdU3.5Hg4mm-C50d8itia-3kRgWNkiurcCZCms5JuRs")
+TOKEN = os.getenv("MTUyMTg0MzY1NjQxNDQ2MjA0NA.GdkdU3.5Hg4mm-C50d8itia-3kRgWNkiurcCZCms5JuRs")
 
 AUTO_ROLE_NAME     = "Community"
 ROSTER_ROLE_NAME   = "Roster"
-RAID_ALERT_USERS   = ["noahblocks23", ""]
+RAID_ALERT_USERS   = ["noahblocks23","Oztix"]
 NEW_ACCOUNT_DAYS   = 7          # accounts younger than this get kicked during an active raid
 MILESTONE_STEP     = 50         # celebrate every 50 members
+TICKET_SUPPORT_ROLE_ID = 1521520766141595689
 
+TICKET_CATEGORY_MAP = {
+    "roster": 1442706134434844682,
+    "staff": 1522361957414469894,
+    "content_creator": 1442706134640099423,
+    "gfx_vfx": 1442706134640099426,
+    "investment": 1442706134828978256,
+    "business": 1442706134040449143,
+    "report": 1442706134040449142,
+    "general_support": 1522365882360266883,
+}
 ADMIN_ROLES = [
-    "Founder",
-    "Chief Technolgy Officer",
+    "2K bot admin",
+    "",
     "",
     "",
     "",
@@ -55,19 +68,19 @@ def bump_stat(uid, field, amount=1):
 
 TICKET_OPTIONS = {
     "roster": {
-        "emoji": "🏀", "label": "Roster Application", "description": "Apply to join the 2K roster (13+ only)",
+        "emoji": "🏀", "label": "Roster Application", "description": "Apply to join the 2K roster",
         "color": discord.Color.orange(), "age_required": True, "resume_required": False,
     },
     "staff": {
-        "emoji": "🛡️", "label": "Staff Application", "description": "Apply to become staff (13+, resume required)",
+        "emoji": "🛡️", "label": "Staff Application", "description": "Apply to become staff (resume required)",
         "color": discord.Color.blue(), "age_required": True, "resume_required": True,
     },
     "content_creator": {
-        "emoji": "🎥", "label": "Content Creator", "description": "Apply to create content for 2K Esports",
-        "color": discord.Color.purple(), "age_required": False, "resume_required": False,
+        "emoji": "🎥", "label": "Content Creator / Streamer", "description": "Apply to join as a content creator/streamer for 2K eSports",
+        "color": discord.Color.purple(), "age_required": True, "resume_required": False,
     },
     "investment": {
-        "emoji": "💰", "label": "Investment", "description": "Invest in 2K Esports",
+        "emoji": "💰", "label": "Investment", "description": "Invest for 2K eSports",
         "color": discord.Color.gold(), "age_required": False, "resume_required": False,
     },
     "business": {
@@ -78,29 +91,29 @@ TICKET_OPTIONS = {
 
 TICKET_QUESTIONS = {
     "roster": [
-        "What is your name and Discord tag?",
-        "How old are you? (Must be 13 or older)",
-        "What is your PSN / Xbox / gamertag?",
-        "What position do you play and what is your current 2K rating?",
-        "How many hours per week can you dedicate to scrimmages and games?",
-        "Share any clips, highlights, or tournament experience if you have any.",
+        "What is your name?",
+        "How old are you?",
+        "What is your PSN / XBOX / GAMERTAG",
+        "What game are you applying for?",
+        "Please send your fortnite tracker.",
+         "How many hours per week can you dedicate to scrimmages and games?",
         "Why do you want to join the 2K Esports roster?",
     ],
     "staff": [
-        "What is your name and Discord tag?",
-        "How old are you? (Must be 13 or older)",
-        "What staff position are you applying for?",
-        "Please paste or describe your resume / previous experience.",
-        "How many hours per week can you actively moderate?",
-        "Have you ever been banned or punished on any Discord server? Explain if yes.",
+        "What is your name?",
+        "How old are you?",
+        "What staff position do you desire? (Human Resources, manegment, chat moderator, etc)",
+        "Please send your resume / previous experience.",
+        "How many hours per week can you actively moderate / work for us?",
         "Why do you want to be staff at 2K Esports?",
     ],
     "content_creator": [
-        "What is your name and Discord tag?",
-        "What type of content do you create? YouTube, TikTok, Twitch, etc.",
+        "What is your name?",
+        "What type of content / streams do you create? YouTube, TikTok, Twitch, etc.",
         "How many followers or subscribers do you have?",
         "Share links to your content or social media.",
-        "Why do you want to create content for 2K Esports?",
+        "Please send a screenshot of you being able to edit your social media accounts to verify.",
+        "Why do you want to join 2K as a Content Creator / Streamer?"
     ],
     "investment": [
         "What is your name and contact information?",
@@ -119,7 +132,7 @@ TICKET_QUESTIONS = {
 }
 
 WELCOME_MESSAGES = [
-    "Welcome to **2K Esports**, {mention}! Glad to have you here. You are member **#{count}**!",
+    "Welcome to **2K Esports**, {mention}! Glad to have you here!",
     "Hey {mention}! Welcome to **2K Esports**! You are our **#{count}** member. Let's hoop!",
     "{mention} just joined **2K Esports**! You are member **#{count}**. Welcome to the squad!",
     "A new baller has arrived! Welcome {mention} to **2K Esports**! You are member **#{count}**.",
@@ -167,6 +180,9 @@ def is_founder(member):
         if role.name in ["Founder", "Co-Founder", "Co Founder", "Owner"]:
             return True
     return member.guild_permissions.administrator
+
+    def is_ticket_support(member):
+    return any(r.id == TICKET_SUPPORT_ROLE_ID for r in member.roles) or member.guild_permissions.administrator
 
 
 def xp_for_level(level):
@@ -369,6 +385,13 @@ async def open_ticket(interaction, ttype):
     member = interaction.user
     cfg    = TICKET_OPTIONS[ttype]
 
+    cat_id = TICKET_CATEGORY_MAP.get(ttype)
+
+cat = None
+if cat_id:
+    cat = guild.get_channel(cat_id)
+
+if not isinstance(cat, discord.CategoryChannel):
     cat = discord.utils.get(guild.categories, name="Tickets")
     if cat is None:
         cat = await guild.create_category("Tickets")
@@ -720,9 +743,11 @@ async def on_message(message):
             spam_tracker[key] = []
             return
 
-        # TICKET STAFF ACTIVITY TRACKING
-        if is_staff(message.author) and message.channel.category and message.channel.category.name == "Tickets":
-            bump_stat(message.author.id, "messages_sent")
+        
+        # STAFF ACTIVITY TRACKING
+        # Counts ALL staff messages since the last reset
+        if is_staff(message.author):
+    bump_stat(message.author.id, "messages_sent")
 
         # XP SYSTEM
         uid = str(message.author.id)
@@ -1240,7 +1265,7 @@ async def modcheck(interaction, member: discord.Member):
     e = discord.Embed(title="Staff Activity — " + member.display_name, color=discord.Color.from_rgb(255, 140, 0))
     e.set_thumbnail(url=member.display_avatar.url)
     e.add_field(name="Tickets Claimed", value=str(stats["tickets_claimed"]), inline=True)
-    e.add_field(name="Messages Sent in Tickets", value=str(stats["messages_sent"]), inline=True)
+    e.add_field(name="Messages Sent Since Last Reset", value=str(stats["messages_sent"]), inline=True)
     e.set_footer(text="2K Esports | Staff Activity Tracker")
     e.timestamp = datetime.utcnow()
     await interaction.response.send_message(embed=e)
@@ -1266,10 +1291,10 @@ async def modget(interaction):
         member = interaction.guild.get_member(int(uid))
         name = member.display_name if member else "Unknown Staff"
         lines.append(
-            str(i) + ". **" + name + "** — " +
-            str(stats["tickets_claimed"]) + " tickets claimed, " +
-            str(stats["messages_sent"]) + " messages sent"
-        )
+    str(i) + ". **" + name + "** — " +
+    str(stats["tickets_claimed"]) + " tickets claimed, " +
+    str(stats["messages_sent"]) + " messages since last reset"
+)
     e.description = "\n".join(lines)
     e.set_footer(text="2K Esports | Staff Activity Tracker")
     e.timestamp = datetime.utcnow()
@@ -1338,6 +1363,21 @@ async def unlock(interaction):
         e = discord.Embed(title="Server Unlocked", description="Unlocked by " + str(interaction.user) + ". " + str(restored) + " channels restored.", color=discord.Color.green())
         e.timestamp = datetime.utcnow()
         await lc.send(embed=e)
+
+        @bot.tree.command(name="addroster", description="Add user to roster (Ticket Support only)")
+async def addroster(interaction, member: discord.Member):
+    if not is_ticket_support(interaction.user):
+        await interaction.response.send_message("Only Ticket Support can use this.", ephemeral=True)
+        return
+
+    role = discord.utils.get(interaction.guild.roles, name=ROSTER_ROLE_NAME)
+
+    if role:
+        await member.add_roles(role)
+
+    await interaction.response.send_message(
+        f"✅ {member.mention} added to roster by {interaction.user.mention}"
+    )
 
 
 # ══════════════════════════════════════════════
