@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import os
 import random
 from dotenv import load_dotenv
-load_dotenv(). 
+ 
 
 TOKEN = os.getenv("MTUyMTg0MzY1NjQxNDQ2MjA0NA.GdkdU3.5Hg4mm-C50d8itia-3kRgWNkiurcCZCms5JuRs")
 
