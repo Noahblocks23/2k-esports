@@ -162,28 +162,21 @@ async def find_users_by_name(guild, usernames):
 
 
 def is_staff(member):
-    for role in member.roles:
-        if role.name in STAFF_ROLES:
-            return True
-    return member.guild_permissions.administrator
+    return any(role.name in STAFF_ROLES for role in member.roles) or member.guild_permissions.administrator
 
 
 def is_admin(member):
-    for role in member.roles:
-        if role.name in ADMIN_ROLES:
-            return True
-    return member.guild_permissions.administrator
+    return any(role.name in ADMIN_ROLES for role in member.roles) or member.guild_permissions.administrator
 
 
 def is_founder(member):
-    for role in member.roles:
-        if role.name in ["Founder", "Co-Founder", "Co Founder", "Owner"]:
-            return True
-    return member.guild_permissions.administrator
+    return any(role.name in ["Founder", "Co-Founder", "Co Founder", "Owner"] for role in member.roles) \
+        or member.guild_permissions.administrator
 
 
 def is_ticket_support(member):
-    return any(r.id == TICKET_SUPPORT_ROLE_ID for r in member.roles) or member.guild_permissions.administrator
+    return any(role.id == TICKET_SUPPORT_ROLE_ID for role in member.roles) \
+        or member.guild_permissions.administrator
 
 
 def xp_for_level(level):
