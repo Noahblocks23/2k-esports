@@ -181,7 +181,8 @@ def is_founder(member):
             return True
     return member.guild_permissions.administrator
 
-    def is_ticket_support(member):
+
+def is_ticket_support(member):
     return any(r.id == TICKET_SUPPORT_ROLE_ID for r in member.roles) or member.guild_permissions.administrator
 
 
