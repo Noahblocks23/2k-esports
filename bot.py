@@ -379,61 +379,50 @@ async def open_ticket(interaction, ttype):
 
     cat_id = TICKET_CATEGORY_MAP.get(ttype)
 
-cat = None
-if cat_id:
-    cat = guild.get_channel(cat_id)
+    cat = None
+    if cat_id:
+        cat = guild.get_channel(cat_id)
 
-if not isinstance(cat, discord.CategoryChannel):
-    cat = discord.utils.get(guild.categories, name="Tickets")
-    if cat is None:
-        cat = await guild.create_category("Tickets")
+    if not isinstance(cat, discord.CategoryChannel):
+        cat = discord.utils.get(guild.categories, name="Tickets")
+        if cat is None:
+            cat = await guild.create_category("Tickets")
 
     cname = ttype.replace("_", "-") + "-" + member.name.lower()
+
     if discord.utils.get(cat.text_channels, name=cname):
-        await interaction.followup.send("You already have an open ticket for this category!", ephemeral=True)
+        await interaction.followup.send(
+            "You already have an open ticket for this category!",
+            ephemeral=True
+        )
         return
 
-    ow = {
+    overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        member:             discord.PermissionOverwrite(read_messages=True, send_messages=True),
-        guild.me:           discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True),
+        member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+        guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True),
     }
+
     for rname in STAFF_ROLES:
         r = discord.utils.get(guild.roles, name=rname)
         if r:
-            ow[r] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
+            overwrites[r] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
-    ch = await cat.create_text_channel(name=cname, overwrites=ow)
+    ch = await cat.create_text_channel(name=cname, overwrites=overwrites)
 
-    age_note    = "\n⚠️ **13+ only. Lying about your age results in a permanent ban.**" if cfg["age_required"] else ""
-    resume_note = "\n📄 **Resume or proof of experience required.**" if cfg["resume_required"] else ""
+    age_note = "\n⚠️ 13+ only." if cfg["age_required"] else ""
+    resume_note = "\n📄 Resume required." if cfg["resume_required"] else ""
 
-    e = discord.Embed(
+    embed = discord.Embed(
         title=cfg["emoji"] + " " + cfg["label"],
-        description=(
-            member.mention + " — describe your inquiry below.\n"
-            "Please wait for an admin to respond." + age_note + resume_note
-        ),
+        description=member.mention + " — please wait for staff." + age_note + resume_note,
         color=cfg["color"],
     )
-    e.set_footer(text="2K Esports | Ticket System")
-    e.timestamp = datetime.utcnow()
+    embed.set_footer(text="2K Esports | Ticket System")
 
-    staff_ping = ""
-    for rname in TICKET_SUPPORT_ROLE_NAMES:
-        r = discord.utils.get(guild.roles, name=rname)
-        if r:
-            staff_ping = r.mention
-            break
+    await ch.send(embed=embed, view=TicketControlView())
 
-    await ch.send(content=staff_ping if staff_ping else None, embed=e, view=TicketControlView())
-    await interaction.followup.send("Your ticket has been created: " + ch.mention, ephemeral=True)
-
-    lc = find_ch(guild, "mod-logs")
-    if lc:
-        le = discord.Embed(title="New Ticket Opened", description=str(member) + " opened a **" + cfg["label"] + "** ticket in " + ch.mention, color=cfg["color"])
-        le.timestamp = datetime.utcnow()
-        await lc.send(embed=le)
+    await interaction.followup.send("Ticket created: " + ch.mention, ephemeral=True)
 
 
 # ══════════════════════════════════════════════
@@ -737,8 +726,8 @@ async def on_message(message):
 
         
         # STAFF ACTIVITY TRACKING
-        # Counts ALL staff messages since the last reset
-        if is_staff(message.author):
+# Counts ALL staff messages since the last reset
+if is_staff(message.author):
     bump_stat(message.author.id, "messages_sent")
 
         # XP SYSTEM
@@ -1354,13 +1343,23 @@ async def unlock(interaction):
     if lc:
         e = discord.Embed(title="Server Unlocked", description="Unlocked by " + str(interaction.user) + ". " + str(restored) + " channels restored.", color=discord.Color.green())
         e.timestamp = datetime.utcnow()
-        await lc.send(embed=e)
-
-        @bot.tree.command(name="addroster", description="Add user to roster (Ticket Support only)")
+       @bot.tree.command(name="addroster", description="Add user to roster (Ticket Support only)")
 async def addroster(interaction, member: discord.Member):
     if not is_ticket_support(interaction.user):
-        await interaction.response.send_message("Only Ticket Support can use this.", ephemeral=True)
+        await interaction.response.send_message(
+            "Only Ticket Support can use this.",
+            ephemeral=True
+        )
         return
+
+    role = discord.utils.get(interaction.guild.roles, name=ROSTER_ROLE_NAME)
+
+    if role:
+        await member.add_roles(role)
+
+    await interaction.response.send_message(
+        f"✅ {member.mention} added to roster by {interaction.user.mention}"
+    )
 
     role = discord.utils.get(interaction.guild.roles, name=ROSTER_ROLE_NAME)
 
