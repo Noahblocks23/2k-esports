@@ -173,7 +173,6 @@ def is_founder(member):
     return any(role.name in ["Founder", "Co-Founder", "Co Founder", "Owner"] for role in member.roles) \
         or member.guild_permissions.administrator
 
-
 def is_ticket_support(member):
     return any(r.id == TICKET_SUPPORT_ROLE_ID for r in member.roles) or member.guild_permissions.administrator
 
