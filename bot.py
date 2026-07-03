@@ -175,9 +175,7 @@ def is_founder(member):
 
 
 def is_ticket_support(member):
-    return any(role.id == TICKET_SUPPORT_ROLE_ID for role in member.roles) \
-        or member.guild_permissions.administrator
-
+    return any(r.id == TICKET_SUPPORT_ROLE_ID for r in member.roles) or member.guild_permissions.administrator
 
 def xp_for_level(level):
     return 100 * level * level
