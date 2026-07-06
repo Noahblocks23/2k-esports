@@ -12,7 +12,7 @@ TOKEN = os.getenv("MTUyMTg0MzY1NjQxNDQ2MjA0NA.GdkdU3.5Hg4mm-C50d8itia-3kRgWNkiur
 
 AUTO_ROLE_NAME     = "Community"
 ROSTER_ROLE_NAME   = "Roster"
-RAID_ALERT_USERS   = ["noahblocks23","Oztix"]
+RAID_ALERT_USERS   = ["noahblocks23","burned.ur.ego"]
 NEW_ACCOUNT_DAYS   = 7          # accounts younger than this get kicked during an active raid
 MILESTONE_STEP     = 50         # celebrate every 50 members
 TICKET_SUPPORT_ROLE_ID = 1521520766141595689
